@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "894820624955",
+    "firebase_url": "https://ufjf-ame.firebaseio.com",
+    "project_id": "ufjf-ame",
+    "storage_bucket": "ufjf-ame.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:894820624955:android:b2b5d4a74191a853",
+        "android_client_info": {
+          "package_name": "ufjf.ame"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "894820624955-8n1runfcrdg1lfuvnnho29ahtivctpom.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMTaAN1H6fwtv7aQz1uxqYC-ASC_QPzug"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
