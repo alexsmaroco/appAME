@@ -101,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void registerUser(String email, String senha) {
         if (!validarDados(email, senha)) {
-            Toast.makeText(this, "Email inválido ou senha com menos de 6 caracteres", Toast.LENGTH_LONG);
+            Toast.makeText(this, "Email inválido ou senha com menos de 4 caracteres", Toast.LENGTH_LONG);
         } else {
             final Context t = this;
             mAuth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {

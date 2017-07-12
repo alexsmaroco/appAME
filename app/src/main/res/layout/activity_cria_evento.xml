@@ -65,46 +65,22 @@
             tools:layout_editor_absoluteX="16dp"
             tools:layout_editor_absoluteY="160dp" />
 
-        <RadioGroup
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:layout_editor_absoluteX="8dp"
-            tools:layout_editor_absoluteY="8dp">
+    <ListView
+        android:id="@+id/CBList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-            <CheckBox
-                android:id="@+id/cbPrimSocorros"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Primeiros socorros" />
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.12"
+        android:text="Insira uma imagem"
+        android:textAlignment="center"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="273dp" />
 
-            <CheckBox
-                android:id="@+id/cbBombeiros"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Bombeiros" />
-
-            <CheckBox
-                android:id="@+id/cbHospitalar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Hospitalar"
-                tools:layout_editor_absoluteX="-68dp"
-                tools:layout_editor_absoluteY="-42dp" />
-
-        </RadioGroup>
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Insira uma imagem"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="273dp" />
-
-        <Button
+    <Button
             android:id="@+id/btnTirarFoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
