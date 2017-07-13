@@ -67,6 +67,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        FirebaseAuth.getInstance().signOut();
 
         db = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -112,15 +113,14 @@ public class LoginActivity extends AppCompatActivity {
         if (!validarDados(nome,email, senha)) {
             Toast.makeText(this, "Email inválido ou nome/senha com menos de 4 caracteres", Toast.LENGTH_LONG);
         } else {
-            final Context t = this;
             mAuth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (!task.isSuccessful()) {
-                        Toast.makeText(t, "Algo errado ao registrar, tente mais tarde", Toast.LENGTH_LONG);
+                        Toast.makeText(getApplicationContext(), "Algo errado ao registrar, tente mais tarde", Toast.LENGTH_LONG);
                     } else {
                         // adiciona o nome do usuario
-                        final FirebaseUser user = mAuth.getCurrentUser();
+                        FirebaseUser user = mAuth.getCurrentUser();
                         UserProfileChangeRequest update = new UserProfileChangeRequest.Builder().setDisplayName(nome).build();
                         user.updateProfile(update).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
@@ -128,17 +128,24 @@ public class LoginActivity extends AppCompatActivity {
                                 if(task.isSuccessful()) {
                                     Log.d("Update profile", "Profile atualizada com sucesso");
                                     // salvando no bd
+                                    FirebaseUser user = mAuth.getCurrentUser();
                                     Usuario usuario = new Usuario();
                                     usuario.setName(nome);
                                     usuario.setUid(user.getUid());
                                     usuario.setCodClasse(1);
                                     usuario.setInfluencia(5);
                                     DatabaseReference ref = db.getReference();
-                                    ref.child("users").child(usuario.getUid()).setValue(usuario).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    Log.d("Salvando usuario no bd", usuario.getName() + " " + usuario.getUid());
+                                    ref.child("users").child(user.getUid()).setValue(usuario).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            Intent it = new Intent(LoginActivity.this, MainActivity.class);
-                                            startActivity(it);
+                                            if(task.isSuccessful()) {
+                                                Log.d("Sucesso", "Dados salvos");
+                                                Intent it = new Intent(LoginActivity.this, MainActivity.class);
+                                                startActivity(it);
+                                            } else {
+                                                task.getException().printStackTrace();
+                                            }
                                         }
                                     });
                                 } else {

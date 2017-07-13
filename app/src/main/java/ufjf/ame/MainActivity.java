@@ -1,11 +1,18 @@
 package ufjf.ame;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -13,13 +20,22 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseUser mAuthUser;
+    private FirebaseDatabase db;
     private TextView txtWelcome;
     private Button btnLogout;
     private Button btnCriarEvento;
@@ -36,14 +52,16 @@ public class MainActivity extends AppCompatActivity {
             Intent it = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(it);
         }
-        userAtual = new Usuario();
-        userAtual.setUid(mAuthUser.getUid());
-        userAtual.setName(mAuthUser.getDisplayName());
-
-        // pegar dados restantes do bd
 
         txtWelcome = (TextView) findViewById(R.id.txtWelcome);
-        txtWelcome.setText("Bem Vindo ao AME, " + userAtual.getName() + "!");
+        userAtual = new Usuario();
+
+        GPS gps = new GPS((LocationManager)getSystemService(Context.LOCATION_SERVICE));
+
+        Log.d("GPS: ", Arrays.toString(gps.getLocalAtual()));
+
+        db = FirebaseDatabase.getInstance();
+        DatabaseReference ref = db.getReference();
 
         btnCriarEvento = (Button) findViewById(R.id.btnCriarEvento);
         btnCriarEvento.setOnClickListener(new View.OnClickListener() {
@@ -59,9 +77,32 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // faz logout e volta pra tela de login
+                try {
+                    FirebaseInstanceId.getInstance().deleteInstanceId();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 FirebaseAuth.getInstance().signOut();
                 Intent it = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(it);
+            }
+        });
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("Recuperando usuario", mAuthUser.getDisplayName());
+                userAtual.setUid(dataSnapshot.child("users").child(mAuthUser.getUid()).getValue(Usuario.class).getUid());
+                userAtual.setName(dataSnapshot.child("users").child(mAuthUser.getUid()).getValue(Usuario.class).getName());
+                userAtual.setInfluencia(dataSnapshot.child("users").child(mAuthUser.getUid()).getValue(Usuario.class).getInfluencia());
+                userAtual.setCodClasse(dataSnapshot.child("users").child(mAuthUser.getUid()).getValue(Usuario.class).getCodClasse());
+
+                txtWelcome.setText("Bem Vindo ao AME, " + userAtual.getName() + "!");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
 

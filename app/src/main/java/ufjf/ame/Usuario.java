@@ -9,6 +9,8 @@ public class Usuario {
     private String name;
     private float influencia;
     private int codClasse; // 1 para usuario comum, 2 para super-usuario e 3 para admin
+    private double latitude;
+    private double longitude;
 
 
     public Usuario() {
@@ -44,5 +46,21 @@ public class Usuario {
 
     public void setCodClasse(int codClasse) {
         this.codClasse = codClasse;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
