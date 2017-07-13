@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,6 +38,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +53,14 @@ import static android.Manifest.permission.READ_CONTACTS;
 public class LoginActivity extends AppCompatActivity {
 
     // UI references.
+    private EditText edtNome;
     private EditText edtEmail;
     private EditText edtSenha;
     private Button btnRegistrar;
     private Button btnLogin;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
+    private FirebaseDatabase db;
 
 
     @Override
@@ -62,6 +68,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        db = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -74,6 +81,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
+        edtNome = (EditText) findViewById(R.id.edtNome);
         edtEmail = (EditText) findViewById(R.id.edtEmail);
         edtSenha = (EditText) findViewById(R.id.edtSenha);
 
@@ -91,17 +99,18 @@ public class LoginActivity extends AppCompatActivity {
         btnRegistrar.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                String email = edtEmail.getText().toString();
-                String senha = edtSenha.getText().toString();
-                registerUser(email, senha);
+                String nome = edtNome.getText().toString().trim();
+                String email = edtEmail.getText().toString().trim();
+                String senha = edtSenha.getText().toString().trim();
+                registerUser(nome, email, senha);
             }
         });
 
     }
 
-    private void registerUser(String email, String senha) {
-        if (!validarDados(email, senha)) {
-            Toast.makeText(this, "Email inválido ou senha com menos de 4 caracteres", Toast.LENGTH_LONG);
+    private void registerUser(final String nome, String email, String senha) {
+        if (!validarDados(nome,email, senha)) {
+            Toast.makeText(this, "Email inválido ou nome/senha com menos de 4 caracteres", Toast.LENGTH_LONG);
         } else {
             final Context t = this;
             mAuth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -110,8 +119,33 @@ public class LoginActivity extends AppCompatActivity {
                     if (!task.isSuccessful()) {
                         Toast.makeText(t, "Algo errado ao registrar, tente mais tarde", Toast.LENGTH_LONG);
                     } else {
-                        Intent it = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(it);
+                        // adiciona o nome do usuario
+                        final FirebaseUser user = mAuth.getCurrentUser();
+                        UserProfileChangeRequest update = new UserProfileChangeRequest.Builder().setDisplayName(nome).build();
+                        user.updateProfile(update).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()) {
+                                    Log.d("Update profile", "Profile atualizada com sucesso");
+                                    // salvando no bd
+                                    Usuario usuario = new Usuario();
+                                    usuario.setName(nome);
+                                    usuario.setUid(user.getUid());
+                                    usuario.setCodClasse(1);
+                                    usuario.setInfluencia(5);
+                                    DatabaseReference ref = db.getReference();
+                                    ref.child("users").child(usuario.getUid()).setValue(usuario).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            Intent it = new Intent(LoginActivity.this, MainActivity.class);
+                                            startActivity(it);
+                                        }
+                                    });
+                                } else {
+                                    task.getException().printStackTrace();
+                                }
+                            }
+                        });
                     }
                 }
             });
@@ -119,7 +153,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signInUser(String email, String senha) {
-        if (!validarDados(email, senha)) {
+        if (!validarDados("default", email, senha)) {
             Toast.makeText(this, "Email e/ou senha inválido(s)", Toast.LENGTH_LONG).show();
         } else {
             final Context t = this;
@@ -127,7 +161,7 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (!task.isSuccessful()) {
-                        Toast.makeText(t, "Usuário e/ou senha incorreto(s). Tente novamente", Toast.LENGTH_LONG).show();
+                        Toast.makeText(t, "Email e/ou senha incorreto(s). Tente novamente", Toast.LENGTH_LONG).show();
                     } else {
                         Intent it = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(it);
@@ -137,12 +171,15 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private boolean validarDados(String email, String senha) {
+    private boolean validarDados(String nome, String email, String senha) {
         String EMAIL_REGEX = "^(.+)@(.+).com$";
         if (!email.matches(EMAIL_REGEX)) {
             return false;
         }
         if (senha.length() < 4) {
+            return false;
+        }
+        if(nome.length() < 4) {
             return false;
         }
         return true;

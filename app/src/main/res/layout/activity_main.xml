@@ -9,10 +9,10 @@
     tools:context="ufjf.ame.MainActivity">
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/txtWelcome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Bem-vindo ao AME!"
+        android:text="Bem-vindo ao AME, @string/permission_rationale.!"
         android:textSize="18sp" />
 
     <TextView

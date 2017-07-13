@@ -9,23 +9,41 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private FirebaseUser mAuthUser;
+    private TextView txtWelcome;
     private Button btnLogout;
     private Button btnCriarEvento;
     private ListView listaEventos;
+    private Usuario userAtual;
     //private ArrayList<Evento> arrayEventos; // lista de eventos, pegar do BD
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mAuthUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(mAuthUser == null) { // sem usuario, volta pro login
+            Intent it = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(it);
+        }
+        userAtual = new Usuario();
+        userAtual.setUid(mAuthUser.getUid());
+        userAtual.setName(mAuthUser.getDisplayName());
+
+        // pegar dados restantes do bd
+
+        txtWelcome = (TextView) findViewById(R.id.txtWelcome);
+        txtWelcome.setText("Bem Vindo ao AME, " + userAtual.getName() + "!");
 
         btnCriarEvento = (Button) findViewById(R.id.btnCriarEvento);
         btnCriarEvento.setOnClickListener(new View.OnClickListener() {
