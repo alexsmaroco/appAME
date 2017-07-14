@@ -1,5 +1,6 @@
 package ufjf.ame;
 
+import android.location.Location;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,9 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
 
 public class CriaEventoActivity extends AppCompatActivity {
@@ -25,12 +29,17 @@ public class CriaEventoActivity extends AppCompatActivity {
     private ListView CBList;
     private ArrayList<String> CBGroup = new ArrayList<String>();
     private ImageView imgView;
+    private Usuario user;
+    private Location loc;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cria_evento);
+
+        user = (Usuario) getIntent().getSerializableExtra("user");
+        loc = getIntent().getParcelableExtra("location");
 
         CBGroup.add("Bombeiros");
         CBGroup.add("Primeiros socorros");
@@ -62,13 +71,19 @@ public class CriaEventoActivity extends AppCompatActivity {
                 int radioId = radioGroup.getCheckedRadioButtonId();
                 if(radioId != -1) { // verificar se há imagem tambem
                     //criando evento
-                    //Evento e = new Evento();
+                    Evento e = new Evento();
+                    e.setConfirmado(false);
+                    e.addUserId(user.getUid());
+                    e.setInfluenciaNecessaria( (6/user.getCodClasse()) * (15 / (user.getInfluencia()+1)) ); // quanto mais influente e 'superior', menos influencia necessaria para confirmar, ex: admin(3) com 10 influencia: (6/3)*(15/11) < 3
+                    e.setInfluenciaTotal(0); // o evento de um usuario recem registrado(cod = 1, influencia = 5) precisaria de (6/1)*(15/5) = 18 pnts
 
                     // Dados do radio button
                     RadioButton rSelecionado = (RadioButton) findViewById(radioId);
                     String emergencia = (String) rSelecionado.getText();
-
-                    // pegando os checkbox marcados
+                    e.setTipoEvt(emergencia);
+                    e.setLoc(loc);
+                    
+                    // pegando as checkboxes marcadas
                     ArrayList<String> suporteSelecionado = new ArrayList<String>();
                     SparseBooleanArray checked = CBList.getCheckedItemPositions();
                     int size = checked.size();
@@ -79,6 +94,7 @@ public class CriaEventoActivity extends AppCompatActivity {
                             suporteSelecionado.add(CBGroup.get(key));
                         }
                     }
+                    e.setSuporte(suporteSelecionado);
                 } else {
                     Toast.makeText(getApplicationContext(), "Selecione uma emergência!", Toast.LENGTH_SHORT).show();
                 }

@@ -1,16 +1,18 @@
 package ufjf.ame;
 
+import android.location.Location;
+
+import java.io.Serializable;
+
 /**
  * Created by Alex.
  */
 
-public class Usuario {
+public class Usuario implements Serializable {
     private String uid;
     private String name;
     private float influencia;
     private int codClasse; // 1 para usuario comum, 2 para super-usuario e 3 para admin
-    private double latitude;
-    private double longitude;
 
 
     public Usuario() {
@@ -48,19 +50,4 @@ public class Usuario {
         this.codClasse = codClasse;
     }
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
 }

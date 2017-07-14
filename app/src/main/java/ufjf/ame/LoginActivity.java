@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -134,6 +135,7 @@ public class LoginActivity extends AppCompatActivity {
                                     usuario.setUid(user.getUid());
                                     usuario.setCodClasse(1);
                                     usuario.setInfluencia(5);
+                                    usuario.setLoc(null);
                                     DatabaseReference ref = db.getReference();
                                     Log.d("Salvando usuario no bd", usuario.getName() + " " + usuario.getUid());
                                     ref.child("users").child(user.getUid()).setValue(usuario).addOnCompleteListener(new OnCompleteListener<Void>() {

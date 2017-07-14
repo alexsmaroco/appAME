@@ -28,12 +28,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationListener {
 
+    private LocationManager lm;
+    private Location loc;
     private FirebaseUser mAuthUser;
     private FirebaseDatabase db;
     private TextView txtWelcome;
@@ -53,12 +56,24 @@ public class MainActivity extends AppCompatActivity {
             startActivity(it);
         }
 
+        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        try {
+            if(lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,0, this);
+                loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            } else if(lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,5000,0,this);
+                loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+
         txtWelcome = (TextView) findViewById(R.id.txtWelcome);
         userAtual = new Usuario();
 
-        GPS gps = new GPS((LocationManager)getSystemService(Context.LOCATION_SERVICE));
-
-        Log.d("GPS: ", Arrays.toString(gps.getLocalAtual()));
+        //GPS gps = new GPS((LocationManager)getSystemService(Context.LOCATION_SERVICE), this);
+        Log.d("Loc: ",loc.getLatitude() + " " + loc.getLongitude());
 
         db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();
@@ -68,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent it = new Intent(MainActivity.this, CriaEventoActivity.class);
+                it.putExtra("user", userAtual);
+                it.putExtra("location", loc);
                 startActivity(it);
             }
         });
@@ -114,7 +131,29 @@ public class MainActivity extends AppCompatActivity {
          */
     }
 
+
+    @Override
+    public void onLocationChanged(Location location) {
+        this.loc = location;
+        Log.d("GPS: ", loc.getLatitude() + " " + loc.getLongitude());
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
 }
+
 
 // Classe para listar os eventos
 /*

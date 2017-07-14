@@ -1,24 +1,30 @@
 package ufjf.ame;
 
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
+
+import java.util.Arrays;
 
 public class GPS implements LocationListener {
 
     private LocationManager lm;
     private Location loc;
+    private Context ctx;
 
-    public GPS(LocationManager locm) {
+    public GPS(LocationManager locm, Context c) {
         loc = null;
         lm = locm;
+        ctx = c;
         try {
             if(lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,0, this);
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,0, this);
                 loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             } else if(lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,0,this);
+                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,5000,0,this);
                 loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             }
         } catch (SecurityException e) {
@@ -37,7 +43,8 @@ public class GPS implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         this.loc = location;
-        System.out.println(loc.getLatitude()+ "  " + loc.getLongitude());
+        Log.d("GPS: ", loc.getLatitude() + " " + loc.getLongitude());
+
     }
 
     @Override
