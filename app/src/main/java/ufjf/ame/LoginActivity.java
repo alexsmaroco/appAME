@@ -117,7 +117,7 @@ public class LoginActivity extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (!task.isSuccessful()) {
+                    if (!task.isSuccessful() && task.isComplete()) {
                         Toast.makeText(getApplicationContext(), "Algo errado ao registrar, tente mais tarde", Toast.LENGTH_LONG);
                     } else {
                         // adiciona o nome do usuario
@@ -126,7 +126,7 @@ public class LoginActivity extends AppCompatActivity {
                         user.updateProfile(update).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                if(task.isSuccessful()) {
+                                if(task.isSuccessful() && task.isComplete()) {
                                     Log.d("Update profile", "Profile atualizada com sucesso");
                                     // salvando no bd
                                     FirebaseUser user = mAuth.getCurrentUser();
@@ -135,7 +135,7 @@ public class LoginActivity extends AppCompatActivity {
                                     usuario.setUid(user.getUid());
                                     usuario.setCodClasse(1);
                                     usuario.setInfluencia(5);
-                                    usuario.setLoc(null);
+
                                     DatabaseReference ref = db.getReference();
                                     Log.d("Salvando usuario no bd", usuario.getName() + " " + usuario.getUid());
                                     ref.child("users").child(user.getUid()).setValue(usuario).addOnCompleteListener(new OnCompleteListener<Void>() {

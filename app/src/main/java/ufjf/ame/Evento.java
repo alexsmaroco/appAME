@@ -10,6 +10,7 @@ import java.util.ArrayList;
  */
 
 public class Evento {
+    private String id;
     private Location loc;
     private String tipoEvt;
     private ArrayList<String> suporte;
@@ -21,6 +22,14 @@ public class Evento {
 
     public Evento() {
         usersId = new ArrayList<String>();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Location getLoc() {

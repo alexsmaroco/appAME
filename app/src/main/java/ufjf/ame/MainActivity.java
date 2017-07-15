@@ -1,14 +1,21 @@
 package ufjf.ame;
 
+import android.*;
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -51,29 +59,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mAuthUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(mAuthUser == null) { // sem usuario, volta pro login
+        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (mAuthUser == null) { // sem usuario, volta pro login
             Intent it = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(it);
         }
-
-        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        try {
-            if(lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,0, this);
-                loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            } else if(lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,5000,0,this);
-                loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            }
-        } catch (SecurityException e) {
-            e.printStackTrace();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 501);
         }
+
 
         txtWelcome = (TextView) findViewById(R.id.txtWelcome);
         userAtual = new Usuario();
-
-        //GPS gps = new GPS((LocationManager)getSystemService(Context.LOCATION_SERVICE), this);
-        Log.d("Loc: ",loc.getLatitude() + " " + loc.getLongitude());
 
         db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();
@@ -82,10 +79,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         btnCriarEvento.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent it = new Intent(MainActivity.this, CriaEventoActivity.class);
-                it.putExtra("user", userAtual);
-                it.putExtra("location", loc);
-                startActivity(it);
+                try {
+                    loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                }
+                if(loc != null) {
+                    Intent it = new Intent(MainActivity.this, CriaEventoActivity.class);
+                    it.putExtra("user", userAtual);
+                    it.putExtra("location", loc);
+                    startActivity(it);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Não é possível obter sua localização atual", Toast.LENGTH_LONG);
+                }
             }
         });
 
@@ -105,15 +111,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
-        ref.addValueEventListener(new ValueEventListener() {
+        ref.child("users").child(mAuthUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("Recuperando usuario", mAuthUser.getDisplayName());
-                userAtual.setUid(dataSnapshot.child("users").child(mAuthUser.getUid()).getValue(Usuario.class).getUid());
-                userAtual.setName(dataSnapshot.child("users").child(mAuthUser.getUid()).getValue(Usuario.class).getName());
-                userAtual.setInfluencia(dataSnapshot.child("users").child(mAuthUser.getUid()).getValue(Usuario.class).getInfluencia());
-                userAtual.setCodClasse(dataSnapshot.child("users").child(mAuthUser.getUid()).getValue(Usuario.class).getCodClasse());
-
+                userAtual = dataSnapshot.getValue(Usuario.class);
+                /*
+                userAtual.setUid(dataSnapshot.getValue(Usuario.class).getUid());
+                userAtual.setName(dataSnapshot.getValue(Usuario.class).getName());
+                userAtual.setInfluencia(dataSnapshot.getValue(Usuario.class).getInfluencia());
+                userAtual.setCodClasse(dataSnapshot.getValue(Usuario.class).getCodClasse());
+                */
                 txtWelcome.setText("Bem Vindo ao AME, " + userAtual.getName() + "!");
             }
 
@@ -131,6 +139,36 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
          */
     }
 
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 501: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(this,
+                            Manifest.permission. ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+
+                        //Request location updates:
+                        String prov = lm.getBestProvider(new Criteria(), false);
+                        lm.requestLocationUpdates(prov, 1000, 0, this);
+                    }
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+
+                }
+                return;
+            }
+
+        }
+    }
 
     @Override
     public void onLocationChanged(Location location) {
