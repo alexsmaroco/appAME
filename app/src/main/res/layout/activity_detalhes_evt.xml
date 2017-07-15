@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1"
+    tools:context="ufjf.ame.DetalhesEvtActivity">
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Detalhes da emergência"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/txtTipoEmerg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Categoria:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtConfirmado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Confirmado?"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtLatitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Latitude:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtLongitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Longitude:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtDistancia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Distância aproximada:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtInfluenciaNec"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="(dev) Influencia necessaria:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtInfluenciaTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="(dev) Influencia obtida:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtSuporte"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Suporte requisitado:"
+        android:textSize="18sp" />
+</LinearLayout>

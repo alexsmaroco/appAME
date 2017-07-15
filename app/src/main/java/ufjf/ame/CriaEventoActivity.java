@@ -61,6 +61,7 @@ public class CriaEventoActivity extends AppCompatActivity {
         loc = getIntent().getParcelableExtra("location");
 
         act = this;
+        img = null;
 
 
         CBGroup.add("Bombeiros");
@@ -95,16 +96,23 @@ public class CriaEventoActivity extends AppCompatActivity {
                 if(radioId != -1) { // verificar se há imagem tambem
                     //criando evento
                     Evento e = new Evento();
-                    e.setConfirmado(false);
                     e.addUserId(user.getUid());
-                    e.setInfluenciaNecessaria( (6/user.getCodClasse()) * (15 / (user.getInfluencia()+1)) ); // quanto mais influente e 'superior', menos influencia necessaria para confirmar, ex: admin(3) com 10 influencia: (6/3)*(15/11) < 3
+                    e.setInfluenciaNecessaria((float)Math.ceil( (6/user.getCodClasse()) * (15 / (user.getInfluencia()+1)) )); // quanto mais influente e de classe 'superior', menos influencia necessaria para confirmar, ex: admin(3) com 10 influencia: (6/3)*(15/11) < 3
                     e.setInfluenciaTotal(0); // o evento de um usuario recem registrado(cod = 1, influencia = 5) precisaria de (6/1)*(15/5) = 18 pnts
 
                     // Dados do radio button
                     RadioButton rSelecionado = (RadioButton) findViewById(radioId);
                     String emergencia = (String) rSelecionado.getText();
                     e.setTipoEvt(emergencia);
-                    e.setLoc(loc);
+                    Local l = new Local();
+                    l.setLatitude(loc.getLatitude());
+                    l.setLongitude(loc.getLongitude());
+                    l.setTime(loc.getTime());
+                    e.setLoc(l);
+
+                    if(img != null) {
+                        e.setImg(img);
+                    }
 
                     // pegando as checkboxes marcadas
                     ArrayList<String> suporteSelecionado = new ArrayList<String>();

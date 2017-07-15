@@ -3,6 +3,7 @@ package ufjf.ame;
 import android.*;
 import android.Manifest;
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,8 +21,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,9 +43,14 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -52,7 +63,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private Button btnCriarEvento;
     private ListView listaEventos;
     private Usuario userAtual;
-    //private ArrayList<Evento> arrayEventos; // lista de eventos, pegar do BD
+    private EventAdapter adapter;
+    private ArrayList<Evento> arrayEventos = new ArrayList<>(); // lista de eventos, pegar do BD
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,14 +126,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ref.child("users").child(mAuthUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("Recuperando usuario", mAuthUser.getDisplayName());
+                Log.d("Recuperando usuario ", mAuthUser.getDisplayName());
                 userAtual = dataSnapshot.getValue(Usuario.class);
-                /*
-                userAtual.setUid(dataSnapshot.getValue(Usuario.class).getUid());
-                userAtual.setName(dataSnapshot.getValue(Usuario.class).getName());
-                userAtual.setInfluencia(dataSnapshot.getValue(Usuario.class).getInfluencia());
-                userAtual.setCodClasse(dataSnapshot.getValue(Usuario.class).getCodClasse());
-                */
                 txtWelcome.setText("Bem Vindo ao AME, " + userAtual.getName() + "!");
             }
 
@@ -131,12 +137,88 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
-        listaEventos = (ListView) findViewById(R.id.listaEventos);
-        /*
-        EventAdapter adapter = new EventAdapter(this, arrayEventos);
-        listaEvento.setAdapter(adapter);
+        DatabaseReference refEvt = db.getReference().child("events");
+        refEvt.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot ds: dataSnapshot.getChildren()) {
+                    Evento evt = ds.getValue(Evento.class);
+                    Log.d("Recuperou evento: ",evt.getId());
+                    if(loc != null) {
+                        Log.d("Distancia: ", distanciaEntre(evt.getLoc().getLatitude(), evt.getLoc().getLongitude(), loc.getLatitude(), loc.getLongitude()) + " metros");
+                    }
+                    arrayEventos.add(evt);
+                }
+                adapter.notifyDataSetChanged();
+            }
 
-         */
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        listaEventos = (ListView) findViewById(R.id.listaEventos);
+        listaEventos.setClickable(true);
+        listaEventos.setEnabled(true);
+        adapter = new EventAdapter(this, arrayEventos);
+        adapter.setLoc(loc);
+        listaEventos.setAdapter(adapter);
+        listaEventos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("clicou no item: ", position+"");
+
+                Intent it = new Intent(MainActivity.this, DetalhesEvtActivity.class);
+                it.putExtra("evt", arrayEventos.get(position));
+                startActivity(it);
+
+            }
+        });
+
+
+    }
+
+    public void atualizaArrayEventos() {
+        DatabaseReference ref = db.getReference();
+        ref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                arrayEventos.clear();
+                for(DataSnapshot ds: dataSnapshot.getChildren()) {
+                    Evento evt = ds.getValue(Evento.class);
+                    Log.d("Distancia: ", distanciaEntre(evt.getLoc().getLatitude(), evt.getLoc().getLongitude(),loc.getLatitude(), loc.getLongitude()) + " metros");
+                    Log.d("Recuperou evento: ",evt.getId());
+                    arrayEventos.add(evt);
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public double distanciaEntre(double lat1, double lng1, double lat2, double lng2) {
+        double earthRadius = 6371;
+
+        double dLat = Math.toRadians(lat2-lat1);
+        double dLng = Math.toRadians(lng2-lng1);
+
+        double sindLat = Math.sin(dLat / 2);
+        double sindLng = Math.sin(dLng / 2);
+
+        double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
+                * Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2));
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        double dist = earthRadius * c;
+
+        return dist;
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -155,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                         //Request location updates:
                         String prov = lm.getBestProvider(new Criteria(), false);
-                        lm.requestLocationUpdates(prov, 1000, 0, this);
+                        lm.requestLocationUpdates(prov, 10000, 0, this);
                     }
 
                 } else {
@@ -174,6 +256,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onLocationChanged(Location location) {
         this.loc = location;
         Log.d("GPS: ", loc.getLatitude() + " " + loc.getLongitude());
+        // atualiza lista de eventos proximos
+        adapter.setLoc(loc);
+        atualizaArrayEventos();
+
     }
 
     @Override
@@ -194,28 +280,47 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
 
 // Classe para listar os eventos
-/*
-public class EventAdapter extends ArrayAdapter<Evento> {
+
+class EventAdapter extends ArrayAdapter<Evento> {
+    private Context ctx;
+    private ArrayList<Evento> evts;
+    private Location loc;
     public EventAdapter(Context context, ArrayList<Evento> evt) {
-        super(context, 0, evt);
+        super(context, android.R.layout.simple_selectable_list_item, evt);
+        this.ctx = context;
+        this.evts = evt;
+    }
+
+    public Location getLoc() {
+        return loc;
+    }
+
+    public void setLoc(Location loc) {
+        this.loc = loc;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
         // Pega o evento
-        Evento evt = getItem(position);
+        final Evento evt = getItem(position);
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_evento, parent, false);
+            convertView = LayoutInflater.from(ctx).inflate(R.layout.item_evento, parent, false);
         }
         // Preenche campos
         TextView tipoEmerg = (TextView) convertView.findViewById(R.id.tipoEmerg);
-        TextView confirmacao = (TextView) convertView.findViewById(R.id.confirmacao);
+        TextView confirmacao = (TextView) convertView.findViewById(R.id.isConf);
         Button btnDetalhes = (Button) convertView.findViewById(R.id.btnDetalhes);
-        // Populate the data into the template view using the data object
-        tipoEmerg.setText(evt.emerg);
-        confirmacao.setText(evt.isConfirmado);
+        tipoEmerg.setText(evt.getTipoEvt());
+        String isConf = "Não confirmado";
+        if (evt.isConfirmado()) {
+            isConf = "Confirmado";
+        }
+        confirmacao.setText(isConf);
+
         // retorna para a lista exibir
         return convertView;
+
     }
 }
-*/
+

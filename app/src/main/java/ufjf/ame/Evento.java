@@ -1,21 +1,22 @@
 package ufjf.ame;
 
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.media.Image;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Alex on 14/07/2017.
  */
 
-public class Evento {
+public class Evento implements Serializable{
     private String id;
-    private Location loc;
+    private Local loc;
     private String tipoEvt;
     private ArrayList<String> suporte;
-    private Image img;
-    private boolean isConfirmado;
+    private Bitmap img;
     private float influenciaTotal; // influencia 'recebida' atualmente
     private float influenciaNecessaria; // influencia necessaria para confirmar o evento
     private ArrayList<String> usersId; // guarda quem votou
@@ -32,11 +33,11 @@ public class Evento {
         this.id = id;
     }
 
-    public Location getLoc() {
+    public Local getLoc() {
         return loc;
     }
 
-    public void setLoc(Location loc) {
+    public void setLoc(Local loc) {
         this.loc = loc;
     }
 
@@ -49,20 +50,12 @@ public class Evento {
     }
 
 
-    public Image getImg() {
+    public Bitmap getImg() {
         return img;
     }
 
-    public void setImg(Image img) {
+    public void setImg(Bitmap img) {
         this.img = img;
-    }
-
-    public boolean isConfirmado() {
-        return isConfirmado;
-    }
-
-    public void setConfirmado(boolean confirmado) {
-        isConfirmado = confirmado;
     }
 
     public float getInfluenciaTotal() {
@@ -99,5 +92,9 @@ public class Evento {
 
     public void addUserId(String uid) {
         this.usersId.add(uid);
+    }
+
+    public boolean isConfirmado() {
+        return (this.influenciaTotal > this.influenciaNecessaria);
     }
 }
