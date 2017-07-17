@@ -13,15 +13,4 @@
             android:layout_height="wrap_content"
             android:text="" />
 
-    <Button
-        android:id="@+id/btnDetalhes"
-        style="@android:style/Widget.Button.Small"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:text="Detalhes"
-        android:textSize="12sp" />
-
 </LinearLayout>

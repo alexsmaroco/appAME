@@ -5,6 +5,7 @@ import android.location.Location;
 import android.media.Image;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -20,9 +21,11 @@ public class Evento implements Serializable{
     private float influenciaTotal; // influencia 'recebida' atualmente
     private float influenciaNecessaria; // influencia necessaria para confirmar o evento
     private ArrayList<String> usersId; // guarda quem votou
+    private ArrayList<String> usersName;
 
     public Evento() {
         usersId = new ArrayList<String>();
+        usersName = new ArrayList<String>();
     }
 
     public String getId() {
@@ -90,11 +93,21 @@ public class Evento implements Serializable{
         this.usersId = usersId;
     }
 
+    public ArrayList<String> getUsersName() {
+        return usersName;
+    }
+
+    public void setUsersName(ArrayList<String> usersName) {
+        this.usersName = usersName;
+    }
+
     public void addUserId(String uid) {
         this.usersId.add(uid);
     }
 
+    public void addUserName(String name) { this.usersName.add(name); }
+
     public boolean isConfirmado() {
-        return (this.influenciaTotal > this.influenciaNecessaria);
+        return (this.influenciaTotal >= this.influenciaNecessaria);
     }
 }

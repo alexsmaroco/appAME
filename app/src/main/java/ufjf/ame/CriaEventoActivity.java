@@ -78,6 +78,7 @@ public class CriaEventoActivity extends AppCompatActivity {
         imgView = (ImageView) findViewById(R.id.imageView);
 
         btnTirarFoto = (Button) findViewById(R.id.btnTirarFoto);
+        btnTirarFoto.setVisibility(View.INVISIBLE);
         btnTirarFoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,6 +98,7 @@ public class CriaEventoActivity extends AppCompatActivity {
                     //criando evento
                     Evento e = new Evento();
                     e.addUserId(user.getUid());
+                    e.addUserName(user.getName());
                     e.setInfluenciaNecessaria((float)Math.ceil( (6/user.getCodClasse()) * (15 / (user.getInfluencia()+1)) )); // quanto mais influente e de classe 'superior', menos influencia necessaria para confirmar, ex: admin(3) com 10 influencia: (6/3)*(15/11) < 3
                     e.setInfluenciaTotal(0); // o evento de um usuario recem registrado(cod = 1, influencia = 5) precisaria de (6/1)*(15/5) = 18 pnts
 

@@ -1,80 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="1"
-    tools:context="ufjf.ame.DetalhesEvtActivity">
-
-    <TextView
-        android:id="@+id/textView4"
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Detalhes da emergência"
-        android:textSize="24sp" />
+        tools:context="ufjf.ame.DetalhesEvtActivity">
 
-    <TextView
-        android:id="@+id/txtTipoEmerg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Categoria:"
-        android:textSize="18sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/txtConfirmado"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Confirmado?"
-        android:textSize="18sp" />
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Detalhes da emergência"
+                android:textSize="24sp" />
 
-    <TextView
-        android:id="@+id/txtLatitude"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Latitude:"
-        android:textSize="18sp" />
+            <TextView
+                android:id="@+id/txtTipoEmerg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Categoria:"
+                android:textSize="18sp" />
 
-    <TextView
-        android:id="@+id/txtLongitude"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Longitude:"
-        android:textSize="18sp" />
+            <TextView
+                android:id="@+id/txtConfirmado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Confirmado?"
+                android:textSize="18sp" />
 
-    <TextView
-        android:id="@+id/txtHora"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Horário:"
-        android:textSize="18sp" />
+            <RelativeLayout
+                android:id="@+id/layoutVotar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
 
-    <TextView
-        android:id="@+id/txtDistancia"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Distância aproximada:"
-        android:textSize="18sp" />
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_margin="5dp"
+                    android:text="Diga se esta emergência é real:"
+                    android:textSize="18sp" />
 
-    <TextView
-        android:id="@+id/txtInfluenciaNec"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="(dev) Influencia necessaria:"
-        android:textSize="18sp" />
+                <Button
+                    android:id="@+id/btnSim"
+                    style="@android:style/Widget.Button.Small"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView8"
+                    android:text="Sim"
+                    android:textSize="14sp" />
 
-    <TextView
-        android:id="@+id/txtInfluenciaTotal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="(dev) Influencia obtida:"
-        android:textSize="18sp" />
+                <Button
+                    android:id="@+id/btnNao"
+                    style="@android:style/Widget.Button.Small"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:text="Não"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignEnd="@+id/textView8" />
 
-    <TextView
-        android:id="@+id/txtSuporte"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Suporte requisitado:"
-        android:textSize="18sp" />
-</LinearLayout>
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/txtInfluenciaNec"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="(dev) Influencia necessaria:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/txtInfluenciaTotal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="(dev) Influencia obtida:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/txtLatitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Latitude:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/txtLongitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Longitude:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/txtHora"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Horário:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/txtDistancia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Distância aproximada:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/txtSuporte"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Suporte requisitado:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/txtVotos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="(dev) Votos:"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </ScrollView>
+

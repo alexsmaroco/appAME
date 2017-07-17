@@ -80,48 +80,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 501);
         }
 
-
-        txtWelcome = (TextView) findViewById(R.id.txtWelcome);
-        userAtual = new Usuario();
-
+        userAtual = null;
         db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();
-
-        btnCriarEvento = (Button) findViewById(R.id.btnCriarEvento);
-        btnCriarEvento.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                } catch (SecurityException e) {
-                    e.printStackTrace();
-                }
-                if(loc != null) {
-                    Intent it = new Intent(MainActivity.this, CriaEventoActivity.class);
-                    it.putExtra("user", userAtual);
-                    it.putExtra("location", loc);
-                    startActivity(it);
-                } else {
-                    Toast.makeText(getApplicationContext(), "Não é possível obter sua localização atual", Toast.LENGTH_LONG);
-                }
-            }
-        });
-
-        btnLogout = (Button) findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // faz logout e volta pra tela de login
-                try {
-                    FirebaseInstanceId.getInstance().deleteInstanceId();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                FirebaseAuth.getInstance().signOut();
-                Intent it = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(it);
-            }
-        });
 
         ref.child("users").child(mAuthUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
@@ -137,16 +98,51 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
+        txtWelcome = (TextView) findViewById(R.id.txtWelcome);
+
+
+        btnCriarEvento = (Button) findViewById(R.id.btnCriarEvento);
+        btnCriarEvento.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    if(loc == null) {
+                        loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    }
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                }
+                if(loc != null && userAtual != null) {
+                    Intent it = new Intent(MainActivity.this, CriaEventoActivity.class);
+                    it.putExtra("user", userAtual);
+                    it.putExtra("location", loc);
+                    startActivity(it);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Não é possível obter sua localização atual", Toast.LENGTH_LONG);
+                }
+            }
+        });
+
+        btnLogout = (Button) findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // faz logout e volta pra tela de login
+                FirebaseAuth.getInstance().signOut();
+                Intent it = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(it);
+            }
+        });
+
+
         DatabaseReference refEvt = db.getReference().child("events");
         refEvt.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                arrayEventos.clear();
                 for(DataSnapshot ds: dataSnapshot.getChildren()) {
                     Evento evt = ds.getValue(Evento.class);
                     Log.d("Recuperou evento: ",evt.getId());
-                    if(loc != null) {
-                        Log.d("Distancia: ", distanciaEntre(evt.getLoc().getLatitude(), evt.getLoc().getLongitude(), loc.getLatitude(), loc.getLongitude()) + " metros");
-                    }
                     arrayEventos.add(evt);
                 }
                 adapter.notifyDataSetChanged();
@@ -167,11 +163,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         listaEventos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("clicou no item: ", position+"");
-
-                Intent it = new Intent(MainActivity.this, DetalhesEvtActivity.class);
-                it.putExtra("evt", arrayEventos.get(position));
-                startActivity(it);
+                try {
+                    if(loc == null) {
+                        loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    }
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                }
+                if(userAtual != null) {
+                    Intent it = new Intent(MainActivity.this, DetalhesEvtActivity.class);
+                    it.putExtra("location", loc);
+                    it.putExtra("evt", arrayEventos.get(position));
+                    it.putExtra("user", userAtual);
+                    startActivity(it);
+                }
 
             }
         });
@@ -310,7 +315,6 @@ class EventAdapter extends ArrayAdapter<Evento> {
         // Preenche campos
         TextView tipoEmerg = (TextView) convertView.findViewById(R.id.tipoEmerg);
         TextView confirmacao = (TextView) convertView.findViewById(R.id.isConf);
-        Button btnDetalhes = (Button) convertView.findViewById(R.id.btnDetalhes);
         tipoEmerg.setText(evt.getTipoEvt());
         String isConf = "Não confirmado";
         if (evt.isConfirmado()) {
