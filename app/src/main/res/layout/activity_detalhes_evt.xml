@@ -44,6 +44,13 @@
         android:textSize="18sp" />
 
     <TextView
+        android:id="@+id/txtHora"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Horário:"
+        android:textSize="18sp" />
+
+    <TextView
         android:id="@+id/txtDistancia"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
