@@ -7,12 +7,15 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.util.Date;
+
 public class DetalhesEvtActivity extends AppCompatActivity {
 
     private TextView txtTipoEvt;
     private TextView txtConfirmado;
     private TextView txtLatitude;
     private TextView txtLongitude;
+    private TextView txtHora;
     private TextView txtDist;
     private TextView txtInfluenciaNec;
     private TextView txtInfluenciaTotal;
@@ -27,6 +30,7 @@ public class DetalhesEvtActivity extends AppCompatActivity {
         txtConfirmado = (TextView) findViewById(R.id.txtConfirmado);
         txtLatitude = (TextView) findViewById(R.id.txtLatitude);
         txtLongitude = (TextView) findViewById(R.id.txtLongitude);
+        txtHora = (TextView) findViewById(R.id.txtHora);
         txtDist = (TextView) findViewById(R.id.txtDistancia);
         txtInfluenciaNec = (TextView) findViewById(R.id.txtInfluenciaNec);
         txtInfluenciaTotal = (TextView) findViewById(R.id.txtInfluenciaTotal);
@@ -36,6 +40,22 @@ public class DetalhesEvtActivity extends AppCompatActivity {
         Evento evt = (Evento) getIntent().getSerializableExtra("evt");
 
         txtTipoEvt.setText(txtTipoEvt.getText() + " " + evt.getTipoEvt());
+        String str = "Não confirmado";
+        if(evt.isConfirmado()) {
+            str = "Confirmado";
+        }
+        txtConfirmado.setText(txtConfirmado.getText()+ " " + str);
+        txtLatitude.setText(txtLatitude.getText() + " " + evt.getLoc().getLatitude());
+        txtLongitude.setText(txtLongitude.getText() + " " + evt.getLoc().getLongitude());
+        txtHora.setText(txtHora.getText() + " " + new Date(evt.getLoc().getTime()));
+        txtInfluenciaNec.setText(txtInfluenciaNec.getText() + " " + evt.getInfluenciaNecessaria());
+        txtInfluenciaTotal.setText(txtInfluenciaTotal.getText() + " " + evt.getInfluenciaTotal());
+        str = "";
+        for(String s: evt.getSuporte()) {
+            str.concat(s + System.lineSeparator());
+        }
+        txtSuporte.setText(txtSuporte.getText() + System.lineSeparator() + str);
+
     }
 
 
