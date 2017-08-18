@@ -106,7 +106,24 @@ public class DetalhesEvtActivity extends AppCompatActivity {
                     evt.addUserId(user.getUid());
                     evt.addUserName(user.getName());
                     ref.child("events").child(evt.getId()).setValue(evt);
-                    Toast.makeText(getApplicationContext(), "Voto computado!", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Voto computado!", Toast.LENGTH_LONG).show();
+                    Intent it = new Intent(DetalhesEvtActivity.this, MainActivity.class);
+                    startActivity(it);
+                }
+            }
+        });
+
+        btnNao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(podeVotar) {
+                    FirebaseDatabase db = FirebaseDatabase.getInstance();
+                    DatabaseReference ref = db.getReference();
+                    evt.setInfluenciaTotal(evt.getInfluenciaTotal()-(user.getInfluencia()*user.getCodClasse())/2);
+                    evt.addUserId(user.getUid());
+                    evt.addUserName(user.getName());
+                    ref.child("events").child(evt.getId()).setValue(evt);
+                    Toast.makeText(getApplicationContext(), "Voto computado!", Toast.LENGTH_LONG).show();
                     Intent it = new Intent(DetalhesEvtActivity.this, MainActivity.class);
                     startActivity(it);
                 }

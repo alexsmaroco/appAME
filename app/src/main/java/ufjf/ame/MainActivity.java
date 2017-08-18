@@ -80,107 +80,120 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 501);
         }
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "O App necessita destas permissões", Toast.LENGTH_LONG).show();
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 501);
+        }
+
+        loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+        txtWelcome = (TextView) findViewById(R.id.txtWelcome);
+        btnCriarEvento = (Button) findViewById(R.id.btnCriarEvento);
+        btnLogout = (Button) findViewById(R.id.btnLogout);
+        listaEventos = (ListView) findViewById(R.id.listaEventos);
+
+
         userAtual = null;
         db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();
+        try {
+            ref.child("users").child(mAuthUser.getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    userAtual = dataSnapshot.getValue(Usuario.class);
+                    txtWelcome.setText("Bem Vindo ao AME, " + userAtual.getName() + "!");
+                }
 
-        ref.child("users").child(mAuthUser.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("Recuperando usuario ", mAuthUser.getDisplayName());
-                userAtual = dataSnapshot.getValue(Usuario.class);
-                txtWelcome.setText("Bem Vindo ao AME, " + userAtual.getName() + "!");
-            }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        txtWelcome = (TextView) findViewById(R.id.txtWelcome);
+                }
+            });
 
 
-        btnCriarEvento = (Button) findViewById(R.id.btnCriarEvento);
-        btnCriarEvento.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    if(loc == null) {
-                        loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "Problema ao conectar-se ao BD", Toast.LENGTH_LONG).show();
+        } finally {
+
+            btnCriarEvento.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        if (loc == null) {
+                            loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        }
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
                     }
-                } catch (SecurityException e) {
-                    e.printStackTrace();
-                }
-                if(loc != null && userAtual != null) {
-                    Intent it = new Intent(MainActivity.this, CriaEventoActivity.class);
-                    it.putExtra("user", userAtual);
-                    it.putExtra("location", loc);
-                    startActivity(it);
-                } else {
-                    Toast.makeText(getApplicationContext(), "Não é possível obter sua localização atual", Toast.LENGTH_LONG);
-                }
-            }
-        });
-
-        btnLogout = (Button) findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // faz logout e volta pra tela de login
-                FirebaseAuth.getInstance().signOut();
-                Intent it = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(it);
-            }
-        });
-
-
-        DatabaseReference refEvt = db.getReference().child("events");
-        refEvt.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                arrayEventos.clear();
-                for(DataSnapshot ds: dataSnapshot.getChildren()) {
-                    Evento evt = ds.getValue(Evento.class);
-                    Log.d("Recuperou evento: ",evt.getId());
-                    arrayEventos.add(evt);
-                }
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        listaEventos = (ListView) findViewById(R.id.listaEventos);
-        listaEventos.setClickable(true);
-        listaEventos.setEnabled(true);
-        adapter = new EventAdapter(this, arrayEventos);
-        adapter.setLoc(loc);
-        listaEventos.setAdapter(adapter);
-        listaEventos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                try {
-                    if(loc == null) {
-                        loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    if (loc != null && userAtual != null) {
+                        Intent it = new Intent(MainActivity.this, CriaEventoActivity.class);
+                        it.putExtra("user", userAtual);
+                        it.putExtra("location", loc);
+                        startActivity(it);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Não é possível obter sua localização atual", Toast.LENGTH_LONG).show();
                     }
-                } catch (SecurityException e) {
-                    e.printStackTrace();
                 }
-                if(userAtual != null) {
-                    Intent it = new Intent(MainActivity.this, DetalhesEvtActivity.class);
-                    it.putExtra("location", loc);
-                    it.putExtra("evt", arrayEventos.get(position));
-                    it.putExtra("user", userAtual);
+            });
+
+
+            btnLogout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // faz logout e volta pra tela de login
+                    FirebaseAuth.getInstance().signOut();
+                    Intent it = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(it);
                 }
+            });
 
-            }
-        });
 
+            DatabaseReference refEvt = db.getReference().child("events");
+            refEvt.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    arrayEventos.clear();
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                        Evento evt = ds.getValue(Evento.class);
+                        arrayEventos.add(evt);
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+
+            listaEventos.setClickable(true);
+            listaEventos.setEnabled(true);
+            adapter = new EventAdapter(this, arrayEventos);
+            adapter.setLoc(loc);
+            listaEventos.setAdapter(adapter);
+            listaEventos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    try {
+                        if (loc == null) {
+                            loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        }
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
+                    }
+                    if (userAtual != null) {
+                        Intent it = new Intent(MainActivity.this, DetalhesEvtActivity.class);
+                        it.putExtra("location", loc);
+                        it.putExtra("evt", arrayEventos.get(position));
+                        it.putExtra("user", userAtual);
+                        startActivity(it);
+                    }
+
+                }
+            });
+        }
 
     }
 
